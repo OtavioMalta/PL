@@ -1,0 +1,143 @@
+% http_handler, http_reply_file
+:- use_module(library(http/http_dispatch)).
+
+% http:location
+:- use_module(library(http/http_path)).
+
+%:- ensure_loaded(caminhos).
+
+/***********************************
+ *                                 *
+ *      Rotas do Servidor Web      *
+ *                                 *
+ ***********************************/
+
+:- multifile http:location/3.
+:- dynamic   http:location/3.
+
+%% http:location(Apelido, Rota, Opções)
+%      Apelido é como será chamada uma Rota do servidor.
+%      Os apelidos css, icons e js já estão definidos na
+%      biblioteca http/http_server_files, os demais precisam
+%      ser definidos.
+
+http:location(img, root(img), []).
+http:location(api, root(api), []).
+http:location(api1, api(v1), []).
+http:location(webfonts, root(webfonts), []).
+
+
+apelido_rota(Apelido, RotaCompleta):-
+  http_absolute_location(Apelido, Rota, []),
+  atom_concat(Rota, '/', RotaCompleta).
+
+/**************************
+ *                        *
+ *      Tratadores        *
+ *                        *
+ **************************/
+
+% Recursos estáticos
+:- http_handler( css(.),
+                 serve_files_in_directory(dir_css), [prefix]).
+:- http_handler( img(.),
+                 serve_files_in_directory(dir_img), [prefix]).
+:- http_handler( js(.),
+                 serve_files_in_directory(dir_js),  [prefix]).
+:- http_handler( webfonts(.),
+                 serve_files_in_directory(dir_webfonts), [prefix]).
+:- http_handler( '/favicon.ico',
+                 http_reply_file(dir_img('favicon.ico'),[]),
+                 []).
+
+% Rotas do Frontend
+
+%% A página inicial
+:- http_handler( root(.), entrada,   []).
+:- http_handler( root(bairros), entradaBairro,   []).
+:- http_handler( root(compras), entradaCompra,   []).
+:- http_handler( root(estados), entradaEstado,   []).
+:- http_handler( root(pedidos), entradaPedido,   []).
+:- http_handler( root(pessoas), entradaPessoa,   []).
+:- http_handler( root(observacoesPropostas), entradaObs,   []).
+:- http_handler( root(funcionarios), entradaFuncionario,   []).
+:- http_handler( root(movimentacoes), entradaMovimentacao,   []).
+
+%:- http_handler( root(.), entrada,   []).
+
+% A página de cadastro de novos bookmarks
+/* :- http_handler( root(bookmark), cadastro, []).
+ */
+%pagina de cadastro
+:- http_handler(root(alunos), mostraAlunos , []).
+:- http_handler(root(bairro), cadastroBai , []).
+:- http_handler(root(compra), cadastroCompra , []).
+:- http_handler(root(estado), cadastroEst , []).
+:- http_handler(root(pedido), cadastroPedido , []).
+:- http_handler(root(pessoa), cadastroPess , []).
+:- http_handler(root(observacoesProposta), cadastroObs , []).
+:- http_handler(root(funcionario), cadastroFun , []).
+:- http_handler(root(movimentacao), cadastroMovi , []).
+
+%editar
+:- http_handler(root(bairro/editar/Id), editarBai(Id) , []).
+:- http_handler(root(compra/editar/Id), editarCompra(Id) , []).
+:- http_handler(root(estado/editar/Id), editarEst(Id) , []).
+:- http_handler(root(pedido/editar/Id), editarPedido(Id) , []).
+:- http_handler(root(pessoa/editar/Id), editarPess(Id) , []).
+:- http_handler(root(observacoesProposta/editar/Id), editarObs(Id) , []).
+:- http_handler(root(funcionario/editar/Id), editarFun(Id) , []).
+:- http_handler(root(movimentacao/editar/Id), editarMov(Id) , []).
+
+%mostrar
+:- http_handler(root(bairro/Id), mostraBai(Id) , []).
+% Rotas do Backend
+
+% Validasao de login
+%:- http_handler( root(valida_login), logins:valida(Metodo),
+                % [ method(Metodo) ]).
+
+
+
+
+
+
+
+
+% Rotas API
+:- http_handler( api1(api_bairro/Id),api_bairro(Metodo, Id),
+                 [ method(Metodo),
+                   methods([ get, post, put, delete ]) ]).
+
+:- http_handler( api1(api_compra/Id),api_compra(Metodo, Id),
+                 [ method(Metodo),
+                   methods([ get, post, put, delete ]) ]).
+
+:- http_handler( api1(api_bookmark/Id),api_bookmark(Metodo, Id),
+                 [ method(Metodo),
+                   methods([ get, post, put, delete ]) ]).
+
+:- http_handler( api1(api_estado/Id),api_estado(Metodo, Id),
+                 [ method(Metodo),
+                   methods([ get, post, put, delete ]) ]).
+
+:- http_handler( api1(api_pedido/Id),api_pedido(Metodo, Id),
+                 [ method(Metodo),
+                   methods([ get, post, put, delete ]) ]).
+
+:- http_handler( api1(api_pessoa/Id),api_pessoa(Metodo, Id),
+                 [ method(Metodo),
+                   methods([ get, post, put, delete ]) ]).
+
+:- http_handler( api1(api_observacoesProposta/Id),api_observacoesProposta(Metodo, Id),
+                 [ method(Metodo),
+                   methods([ get, post, put, delete ]) ]).
+
+:- http_handler( api1(api_funcionario/Id),api_funcionario(Metodo, Id),
+                 [ method(Metodo),
+                   methods([ get, post, put, delete ]) ]).
+
+:- http_handler( api1(api_movi_compras/Id),api_movi_compras(Metodo, Id),
+                 [ method(Metodo),
+                   methods([ get, post, put, delete ]) ]).
+

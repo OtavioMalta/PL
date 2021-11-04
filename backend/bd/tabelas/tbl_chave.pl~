@@ -1,0 +1,4 @@
+created(1635791137.664965).
+assert(chave(bookmark,1)).
+assert(chave(bookmark,5)).
+assert(chave(bairro,1)).

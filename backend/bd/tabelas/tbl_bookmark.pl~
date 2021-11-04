@@ -1,0 +1,6 @@
+created(1635791137.66167).
+assert(bookmark(1,bairro,'http://localhost:9000/bairro')).
+assert(bookmark(2,compra,'http://localhost:9000/compra')).
+assert(bookmark(3,bairro,"http://localhost:8000/bairro")).
+assert(bookmark(4,bairro,"http://localhost:8000/bairro")).
+assert(bookmark(5,bairro,"http://localhost:8000/bairro")).

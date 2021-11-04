@@ -1,0 +1,129 @@
+/* html//1, reply_html_page  */
+:- use_module(library(http/html_write)).
+/* html_requires  */
+:- use_module(library(http/html_head)).
+
+:- ensure_loaded(gabarito(boot5rest)).
+
+
+
+/* PÃ¡gina de cadastro de bookmark */
+cadastroEst(_Pedido):-
+    reply_html_page(
+        boot5rest,
+        [ title('Estado')],
+        [ div(class(container),
+              [ \html_requires(js('bookmark.js')),
+                h1('Novo Estado'),
+                \form_bookmarkest
+              ]) ]).
+
+form_bookmarkest -->
+    html(form([ id('bookmark-form'),
+                onsubmit("redirecionaResposta( event, '/estados' )"),
+                action('/api/v1/api_estado/')],
+              [ \metodo_de_envio('POST'),
+                \campo(estNom, 'Nome do Estado', text),
+                \campo(estQtd, 'Quantidade de Estado', text),
+                \enviar_ou_cancelar('/estados')
+              ])).
+
+/*
+enviar_ou_cancelar(RotaDeRetorno) -->
+    html(div([ class('btn-group'), role(group), 'aria-label'('Enviar ou cancelar')],
+             [ button([ type(submit),
+                        class('btn btn-outline-primary')], 'Enviar'),
+               a([ href(RotaDeRetorno),
+                   class('ms-3 btn btn-outline-danger')], 'Cancelar')
+            ])).
+
+
+
+
+campo(Nome, Titulo, Tipo) -->
+    html(div(class('mb-3'),
+             [ label([ for(Nome), class('form-label') ], Titulo),
+               input([ type(Tipo), class('form-control'),
+                       id(Nome), name(Nome)])
+             ] )).
+
+/*
+
+/* PÃ¡gina para ediÃ§Ã£o (alteraÃ§Ã£o) de um bookmark  */
+
+editarEst(AtomId, _Pedido):-
+    atom_number(AtomId, Id),
+    ( estado:estado(Id,EstNom,EstQtd)
+    ->
+    reply_html_page(
+        boot5rest,
+        [ title('Estado')],
+        [ div(class(container),
+              [ \html_requires(js('bookmark.js')),
+                h1('Meus Estados'),
+                \form_bookmarkest(Id,EstNom,EstQtd)
+              ]) ])
+    ; throw(http_reply(not_found(Id)))
+    ).
+
+
+form_bookmarkest(Id,EstNom,EstQtd) -->
+    html(form([ id('bookmark-form'),
+                onsubmit("redirecionaResposta( event, '/estados' )"),
+                action('/api/v1/api_estado/~w' - Id)],
+
+              [ \metodo_de_envio('PUT'),
+                \campo_nao_editavel(id, 'Id', text, Id),
+                \campo(estNom, 'Nome do Estado', text, EstNom),
+                \campo(estQtd, 'Quantidade de Estado', text, EstQtd),
+                \enviar_ou_cancelar('/estados')
+              ])).
+
+
+mostraEst(AtomId, _Pedido):-
+    atom_number(AtomId, Id),
+    ( estado:estado(Id,EstNom,EstQtd)
+    ->
+    reply_html_page(
+        boot5rest,
+        [ title('Estado')],
+        [ div(class(container),
+              [ \html_requires(js('bookmark.js')),
+                h1('Meus Estados'),
+                \form_bookmarkmosest(Id,EstNom,EstQtd)
+              ]) ])
+    ; throw(http_reply(not_found(Id)))
+    ).
+
+
+form_bookmarkmosest(Id,EstNom,EstQtd) -->
+    html(form([ id('bookmark-form'),
+                onsubmit("redirecionaResposta( event, '/' )"),
+                action('/api/v1/api_estado/~w' - Id) ],
+              [ \metodo_de_envio('PUT'),
+                \campo_nao_editavel(id, 'Id', text, Id),
+                \campo_nao_editavel(estNom, 'Nome do Estado', text, EstNom),
+                \campo_nao_editavel(estQtd, 'Quantidade de Estado', integer, EstQtd),
+                \enviar_ou_cancelar('/estados')
+              ])).
+/*
+campo(Nome, Titulo, Tipo, Valor) -->
+    html(div(class('mb-3'),
+             [ label([ for(Nome), class('form-label')], Titulo),
+               input([ type(Tipo), class('form-control'),
+                       id(Nome), name(Nome), value(Valor)])
+             ] )).
+
+campo_nao_editavel(Nome, Titulo, Tipo, Valor) -->
+    html(div(class('mb-3 w-25'),
+             [ label([ for(Nome), class('form-label')], Titulo),
+               input([ type(Tipo), class('form-control'),
+                       id(Nome),
+                       % name(Nome),%  nÃ£o Ã© para enviar o id
+                       value(Valor),
+                       readonly ])
+             ] )).
+
+metodo_de_envio(Metodo) -->
+    html(input([type(hidden), name('_metodo'), value(Metodo)])).
+*/

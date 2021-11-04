@@ -1,0 +1,54 @@
+:- use_module(library(http/http_parameters)).
+:- use_module(library(http/http_header)).
+:- use_module(library(http/http_json)).
+
+:- use_module(bd(bairro),[]).
+
+bairro(get,'',_Pedido):- !,
+    envia_tabela.
+
+bairro(get,AtomId,_Pedido):-
+    atom_number(AtomId,Id),
+    !,
+    envia_tupla(Id).
+
+bairro('POST',_,Pedido):-
+    http_read_json_dict(Pedido, Dados),
+    !,
+    insere_tupla(Dados).
+
+bairro(put,AtomId,Pedido):-
+    atom_number(AtomId,Id),
+    http_read_json_dict(Pedido,Dados),!,
+    atualiza_tupla(Dados,Id).
+
+bairro(delete,AtomId,_Pedido):-
+    atom_number(AtomId,Id),!,
+    bairro:remove(Id),
+    throw(http_reply(no_content)).
+
+bairro(Met,Id,_Pedido):-
+    throw(http_reply(method_not_allowed(Met,Id))).
+
+insere_tupla(_{ id:BaiCod, nom:BaiNom, cep: BaiCep, abrev: BaiNomAbre, qtd: BaiQtd}):-
+    bairro:insere(BaiCod,BaiNom,BaiCep,BaiNomAbre,BaiQtd)
+    -> envia_tupla(BaiCod)
+    ; throw(http_reply(bad_request('Informação Ausente'))).
+
+atualiza_tupla(_{ nom:BaiNom, cep: BaiCep, abrev: BaiNomAbre, qtd: BaiQtd},BaiCod):-
+    bairro:atualiza(BaiCod,BaiNom,BaiCep,BaiNomAbre,BaiQtd)
+    -> envia_tupla(BaiCod)
+    ;  throw(http_reply(not_found(BaiCod))).
+
+envia_tupla(BaiCod):-
+    bairro:bairro(BaiCod,BaiNom,BaiCep,BaiNomAbre,BaiQtd)
+    -> reply_json_dict(_{ id:BaiCod, nom:BaiNom, cep: BaiCep, abrev: BaiNomAbre, qtd: BaiQtd})
+    ; throw(http_reply(not_found(BaiCod))).
+
+envia_tabela:-
+    findall(_{ id:BaiCod, nom:BaiNom, cep: BaiCep, abrev: BaiNomAbre, qtd: BaiQtd},
+            bairro:bairro(BaiCod,BaiNom,BaiCep,BaiNomAbre,BaiQtd),
+            Tuplas),
+    reply_json_dict(Tuplas).
+
+

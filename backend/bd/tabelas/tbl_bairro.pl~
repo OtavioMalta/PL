@@ -1,0 +1,6 @@
+created(1635792350.011331).
+assert(bairro(12,'Tubaras',3218,'TUbs',1)).
+assert(bairro(12,te,13,er,2)).
+assert(bairro(tr,te,13,er,2)).
+assert(bairro(1,tubaras,123,tub,1)).
+assert(bairro(1,teste,123,tut,1)).

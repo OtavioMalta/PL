@@ -1,0 +1,9 @@
+created(1635973743.323288).
+assert(compra(3,"12","Baca","PDD","DAta","SEpea","12","Tenis","25/10/2021")).
+assert(compra(4,"1","Baca","PDD","DAta","SEpea","1","Computador","30/05/2020")).
+assert(compra(5,"20","Baca","PDD","DAta","SEpea","12","Pen-Drive","30/08/2021")).
+assert(compra(2,"1","Baca","PDD","DAta","SEpea","12","Camisa","27/09/2021")).
+assert(compra(11,"","","","","","","","")).
+assert(compra(12,"","","","","","","","")).
+assert(compra(13,"","","","","","","","")).
+assert(compra(14,"","","","","","","Delete-me","")).

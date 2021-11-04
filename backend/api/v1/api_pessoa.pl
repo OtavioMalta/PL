@@ -1,0 +1,56 @@
+:- use_module(library(http/http_parameters)).
+:- use_module(library(http/http_header)).
+:- use_module(library(http/http_json)).
+
+:- use_module(bd(pessoa),[]).
+
+api_pessoa(get,'',_Pedido):- !,
+    envia_tabelapess.
+
+api_pessoa(get,AtomId,_Pedido):-
+    atom_number(AtomId,Id),
+    !,
+    envia_tuplapess(Id).
+
+api_pessoa(post,_,Pedido):-
+    http_read_json_dict(Pedido, Dados),
+    !,
+    insere_tuplapess(Dados).
+
+api_pessoa(put,AtomId,Pedido):-
+    atom_number(AtomId,Id),
+    http_read_json_dict(Pedido,Dados),!,
+    atualiza_tuplapess(Dados,Id).
+
+api_pessoa(delete,AtomId,_Pedido):-
+    atom_number(AtomId,Id),!,
+    pessoa:remove(Id),
+    throw(http_reply(no_content)).
+
+api_pessoa(Met,Id,_Pedido):-
+    throw(http_reply(method_not_allowed(Met,Id))).
+
+insere_tuplapess(_{ fisTipo: FisTipo, fisNom:FisNom, fisRazSoc:FisRazSoc,fisDatNas:FisDatNas,fisSexo:FisSexo,fisCpf:FisCpf,fisCnpj:FisCnpj,fisEstNom:FisEstNom, fisCidNom:FisCidNom,fisBaiNom:FisBaiNom, fisLgrNom:FisLgrNom, fisLgrNro:FisLgrNro,fisEmail:FisEmail, fisFon:FisFon, fisFon2: FisFon2,fisFax:FisFax,fisCel:FisCel, fisDatReg: FisDatReg,fidIndCad:FidIndCad}):-
+pessoa:insere(FisCod,FisTipo,FisNom,FisRazSoc,FisDatNas,FisSexo,FisCpf,FisCnpj,FisEstNom,FisCidNom,FisBaiNom,FisLgrNom,FisLgrNro,FisEmail,FisFon,FisFon2,FisFax,FisCel,FisDatReg,FidIndCad)
+    -> envia_tuplapess(FisCod)
+    ; throw(http_reply(bad_request('URL ausente'))).
+
+atualiza_tuplapess(_{fisTipo: FisTipo, fisNom:FisNom, fisRazSoc: FisRazSoc,fisDatNas: FisDatNas,fisSexo:FisSexo,fisCpf:FisCpf, fisCnpj:FisCnpj, fisEstNom:FisEstNom, fisCidNom:FisCidNom,fisBaiNom:FisBaiNom, fisLgrNom:FisLgrNom, fisLgrNro:FisLgrNro,fisEmail:FisEmail, fisFon:FisFon, fisFon2: FisFon2, fisFax:FisFax, fisCel:FisCel, fisDatReg: FisDatReg,fidIndCad:FidIndCad},FisCod):-
+    pessoa:atualiza(FisCod,FisTipo,FisNom,FisRazSoc,FisDatNas,FisSexo,FisCpf,FisCnpj,FisEstNom,FisCidNom,FisBaiNom,FisLgrNom,FisLgrNro,FisEmail,FisFon,FisFon2,FisFax,FisCel,FisDatReg,FidIndCad)
+    -> envia_tuplapess(FisCod)
+    ;  throw(http_reply(not_found(FisCod))).
+
+envia_tuplapess(FisCod):-
+    pessoa:pessoa(FisCod,FisTipo,FisNom,FisRazSoc,FisDatNas,FisSexo,FisCpf,FisCnpj,FisEstNom,FisCidNom,FisBaiNom,FisLgrNom,FisLgrNro,FisEmail,FisFon,FisFon2,FisFax,FisCel,FisDatReg,FidIndCad)
+    -> reply_json_dict(_{fisCod:FisCod, fisTipo: FisTipo, fisNom:FisNom, fisRazSoc: FisRazSoc,fisDatNas: FisDatNas,
+fisSexo:FisSexo,fisCpf:FisCpf, fisCnpj:FisCnpj, fisEstNom: FisEstNom, fisCidNom:FisCidNom,fisBaiNom:FisBaiNom, fisLgrNom:FisLgrNom, fisLgrNro:FisLgrNro,fisEmail:FisEmail, fisFon:FisFon, fisFon2: FisFon2, fisFax:FisFax, fisCel:FisCel, fisDatReg: FisDatReg,fidIndCad:FidIndCad})
+    ; throw(http_reply(not_found(FisCod))).
+
+envia_tabelapess:-
+    findall(_{fisCod:FisCod, fisTipo: FisTipo, fisNom:FisNom, fisRazSoc: FisRazSoc,fisDatNas: FisDatNas,
+fisSexo:FisSexo,fisCpf:FisCpf, fisCnpj:FisCnpj, fisEstNom: FisEstNom, fisCidNom:FisCidNom,fisBaiNom:FisBaiNom, fisLgrNom:FisLgrNom, fisLgrNro:FisLgrNro,fisEmail:FisEmail, fisFon:FisFon, fisFon2: FisFon2, fisFax:FisFax, fisCel:FisCel, fisDatReg: FisDatReg,fidIndCad:FidIndCad},
+            pessoa:pessoa(FisCod,FisTipo,FisNom,FisRazSoc,FisDatNas,FisSexo,FisCpf,FisCnpj,FisEstNom,FisCidNom,FisBaiNom,FisLgrNom,FisLgrNro,FisEmail,FisFon,FisFon2,FisFax,FisCel,FisDatReg,FidIndCad),
+            Tuplas),
+    reply_json_dict(Tuplas).
+
+

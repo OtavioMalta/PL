@@ -1,0 +1,96 @@
+:- use_module(library(http/http_parameters)).
+:- use_module(library(http/http_header)).
+:- use_module(library(http/http_json)).
+
+:- use_module(bd(compra),[]).
+
+compras(get,'',_Pedido):- !,
+    envia_tabela.
+
+compras(get,AtomId,_Pedido):-
+    atom_number(AtomId,Id),
+    !,
+    envia_tupla(Id).
+
+compras(post,_,Pedido):-
+    http_read_json_dict(Pedido, Dados),
+    !,
+    insere_tupla(Dados).
+
+compras(put,AtomId,Pedido):-
+    atom_number(AtomId,Id),
+    http_read_json_dict(Pedido,Dados),!,
+    atualiza_tupla(Dados,Id).
+
+compras(delete,AtomId,_Pedido):-
+    atom_number(AtomId,Id),!,
+    compra:remove(Id),
+    throw(http_reply(no_content)).
+
+compras(Met,Id,_Pedido):-
+    throw(http_reply(method_not_allowed(Met,Id))).
+
+
+insere_tupla(_{codEstoque: EsqCod,
+	       codEmpresa: EmpCod,
+	       codBaixa: BaxEsqCod,
+	       qtdBaxEsq: BaxEsqQtd,
+	       baxa: Baxa,
+	       numPedido: BaxEsqPdd,
+	       dataBaxa: BaxEsqDat,
+	       sep: Separador,
+	       qtdCompra: ComEsqQtd,
+	       compra: Compra,
+	       dataCompra: ComesqDat}),
+
+    compra:insere(EsqCod,EmpCod,BaxEsqCod,BaxEsqQtd,Baxa,BaxEsqPdd,BaxEsqDat,Separador,ComEsqQtd,Compra,ComesqDat)
+    -> envia_tupla(EsqCod)
+    ; throw(http_reply(bad_request('Informação Ausente'))).
+
+atualiza_tupla(_{codEmpresa: EmpCod,
+	       codBaixa: BaxEsqCod,
+	       qtdBaxEsq: BaxEsqQtd,
+	       baxa: Baxa,
+	       numPedido: BaxEsqPdd,
+	       dataBaxa: BaxEsqDat,
+	       sep: Separador,
+	       qtdCompra: ComEsqQtd,
+	       compra: Compra,
+	       dataCompra: ComesqDat},EsqCod):-
+
+    compra:atualiza(EsqCod,EmpCod,BaxEsqCod,BaxEsqQtd,Baxa,BaxEsqPdd,BaxEsqDat,Separador,ComEsqQtd,Compra,ComesqDat)
+    -> envia_tupla(EsqCod)
+    ;  throw(http_reply(not_found(EsqCod))).
+
+
+envia_tupla(EsqCod):-
+    compra:compra(EsqCod,EmpCod,BaxEsqCod,BaxEsqQtd,Baxa,BaxEsqPdd,BaxEsqDat,Separador,ComEsqQtd,Compra,ComesqDat)
+
+    -> reply_json_dict(_{codEstoque: EsqCod,
+	       codEmpresa: EmpCod,
+	       codBaixa: BaxEsqCod,
+	       qtdBaxEsq: BaxEsqQtd,
+	       baxa: Baxa,
+	       numPedido: BaxEsqPdd,
+	       dataBaxa: BaxEsqDat,
+	       sep: Separador,
+	       qtdCompra: ComEsqQtd,
+	       compra: Compra,
+	       dataCompra: ComesqDat})
+    ; throw(http_reply(not_found(EsqCod))).
+
+envia_tabela:-
+    findall(_{codEstoque: EsqCod,
+	       codEmpresa: EmpCod,
+	       codBaixa: BaxEsqCod,
+	       qtdBaxEsq: BaxEsqQtd,
+	       baxa: Baxa,
+	       numPedido: BaxEsqPdd,
+	       dataBaxa: BaxEsqDat,
+	       sep: Separador,
+	       qtdCompra: ComEsqQtd,
+	       compra: Compra,
+	       dataCompra: ComesqDat},
+            compra:compra(EsqCod,EmpCod,BaxEsqCod,BaxEsqQtd,Baxa,BaxEsqPdd,BaxEsqDat,Separador,ComEsqQtd,Compra,ComesqDat),
+            Tuplas),
+    reply_json_dict(Tuplas).

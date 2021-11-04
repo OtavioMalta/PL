@@ -1,0 +1,70 @@
+:- use_module(library(http/http_parameters)).
+:- use_module(library(http/http_header)).
+:- use_module(library(http/http_json)).
+
+:- use_module(bd(compra),[]).
+
+api_compra(get,'',_Pedido):- !,
+    envia_tabelaCp.
+
+api_compra(get,AtomId,_Pedido):-
+    atom_number(AtomId,Id),
+    !,
+    envia_tuplaCP(Id).
+
+api_compra(post,_,Pedido):-
+    http_read_json_dict(Pedido, Dados),
+    !,
+    insere_tuplaCp(Dados).
+
+api_compra(put,AtomId,Pedido):-
+    atom_number(AtomId,Id),
+    http_read_json_dict(Pedido,Dados),!,
+    atualiza_tuplaCp(Dados,Id).
+
+api_compra(delete,AtomId,_Pedido):-
+    atom_number(AtomId,Id),!,
+    compra:remove(Id),
+    throw(http_reply(no_content)).
+
+api_compra(Met,Id,_Pedido):-
+    throw(http_reply(method_not_allowed(Met,Id))).
+
+
+insere_tuplaCp(_{
+	       baxEsqQtd: BaxEsqQtd,
+	       baxa: Baxa,
+	       baxEsqPdd: BaxEsqPdd,
+	       baxEsqDat: BaxEsqDat,
+	       separador: Separador,
+	       comEsqQtd: ComEsqQtd,
+	       compra: Compra,
+	       comesqDat: ComesqDat}):-
+
+    compra:insere(EsqCod,BaxEsqQtd,Baxa,BaxEsqPdd,BaxEsqDat,Separador,ComEsqQtd,Compra,ComesqDat)
+    -> envia_tuplaCP(EsqCod)
+    ; throw(http_reply(bad_request('Informação Ausente'))).
+
+atualiza_tuplaCp(_{baxEsqQtd: BaxEsqQtd,baxa: Baxa,baxEsqPdd: BaxEsqPdd,baxEsqDat: BaxEsqDat,separador: Separador,comEsqQtd: ComEsqQtd,compra: Compra,comesqDat: ComesqDat},EsqCod):-
+     compra:atualiza(EsqCod,BaxEsqQtd,Baxa,BaxEsqPdd,BaxEsqDat,Separador,ComEsqQtd,Compra,ComesqDat)
+    -> envia_tuplaCP(EsqCod)
+    ;  throw(http_reply(not_found(EsqCod))).
+
+envia_tuplaCP(EsqCod):-
+    compra:compra(EsqCod,BaxEsqQtd,Baxa,BaxEsqPdd,BaxEsqDat,Separador,ComEsqQtd,Compra,ComesqDat)
+    -> reply_json_dict(_{esqCod: EsqCod,baxEsqQtd: BaxEsqQtd,baxa: Baxa,baxEsqPdd: BaxEsqPdd,baxEsqDat: BaxEsqDat,separador: Separador,comEsqQtd: ComEsqQtd,compra: Compra,comesqDat: ComesqDat})
+    ; throw(http_reply(not_found(EsqCod))).
+
+envia_tabelaCp:-
+    findall(_{esqCod: EsqCod,
+	       baxEsqQtd: BaxEsqQtd,
+	       baxa: Baxa,
+	       baxEsqPdd: BaxEsqPdd,
+	       baxEsqDat: BaxEsqDat,
+	       separador: Separador,
+	       comEsqQtd: ComEsqQtd,
+	       compra: Compra,
+	       comesqDat: ComesqDat},
+            compra:compra(EsqCod,BaxEsqQtd,Baxa,BaxEsqPdd,BaxEsqDat,Separador,ComEsqQtd,Compra,ComesqDat),
+            Tuplas),
+    reply_json_dict(Tuplas).
